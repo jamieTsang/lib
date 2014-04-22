@@ -47,6 +47,10 @@ Response.uiController = {
     },
     hideLoadingBar: function () {
         $('#loading_unit .progress').hide();
+    },
+    beforeSend: function () {
+        $(this.boxObject).fadeIn('normal');
+        $('#loading_unit p').html("<img src='/subject/edit/images/loading_bar.gif' />");
     }
 };
 
