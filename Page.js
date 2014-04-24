@@ -5,8 +5,8 @@ var Page={};
 Page.location=String(window.location);
 Page.Editor=[];
 Page.getDocumentName=function(){
-    if(this.location.match(/\?(\d{6}_\w+_*\w+)/i))
-        return this.location.match(/\?(\d{6}_\w+_*\w+)/i)[1];
+    if(this.location.match(/\?\S*(\d{6}_\w+_*\w+)/i))
+        return this.location.match(/\?\S*(\d{6}_\w+_*\w+)/i)[1];
 };
 Page.getHashNumber=function(){
     if(this.location.match("#"))

@@ -7,7 +7,7 @@ var Response = {
 };
 
 Response.uiController = {
-    BoxStyle: '#loading_unit{display:none;border-radius:8px;box-shadow:0 0 4px rgba(0,0,0,.5),inset 0 0 60.5px rgba(225,225,225,.4);position:fixed;z-index:9999;width:310px;height:auto;left:50%;top:50%;margin-left:-155px;margin-top:-60px;background:white;text-align:center;font-size:16px;}#loading_unit p{margin:0;}#loading_unit h1{font-size:16px;color:#555;font-weight:bold;padding:0;margin:16px 0 5px 0;letter-spacing:-.0125em;background:none;}#loading_unit h2{font-size:12px;color:#555;font-weight:400;padding:0;letter-spacing:-.0125em;',
+    BoxStyle: '#loading_unit{display:none;border-radius:8px;box-shadow:0 0 4px rgba(0,0,0,.5),inset 0 0 60.5px rgba(225,225,225,.4);position:fixed;z-index:9999;width:310px;height:auto;left:50%;top:50%;margin-left:-155px;margin-top:-60px;background:white;text-align:center;font-size:16px;}#loading_unit p{margin:0;}#loading_unit h1{font-size:16px;color:#555;font-weight:bold;padding:0;margin:16px 0 5px 0;letter-spacing:-.0125em;background:none;}#loading_unit h2{font-size:12px;color:#555;font-weight:400;padding:0;letter-spacing:-.0125em;margin:0.83em;',
     boxObject: null,
     DrawBox: function () {
         var oLoadingBox = document.createElement('div');
@@ -29,7 +29,7 @@ Response.uiController = {
             this.boxObject.innerHTML = '<h1>保存结果</h1><p><img src="/subject/edit/images/onebit_33.png" /></p><h2>操作失败！详细情况：' + exp + '</h2>';
         $('#loading_unit').fadeIn('normal');
     },
-    showResult: function () {
+    hideProgress: function () {
         $('#loading_unit .progress').fadeOut(1000);
     },
     showComputedResult: function (index) {
@@ -51,6 +51,16 @@ Response.uiController = {
     beforeSend: function () {
         $(this.boxObject).fadeIn('normal');
         $('#loading_unit p').html("<img src='/subject/edit/images/loading_bar.gif' />");
+    },
+    showResultBox: function (title,isSucess,result) {
+        $(this.boxObject).fadeIn('100');
+        var strLogo = '';
+        if(isSucess)
+            strLogo = "<img src='/subject/edit/images/onebit_34.png' />";
+        else
+            strLogo = "<img src='/subject/edit/images/onebit_33.png' />";
+        this.boxObject.innerHTML = '<h1>'+title+'</h1><p>' + strLogo + '</p><h2>'+result+'</h2>';
+        setTimeout("$(Response.uiController.boxObject).fadeOut(500)", 3000);
     }
 };
 
