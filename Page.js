@@ -2,6 +2,7 @@
  * Created by Administrator on 2014/4/20.
  */
 var Page={};
+Page.version='';
 Page.location=String(window.location);
 Page.Editor=[];
 Page.getDocumentName=function(){

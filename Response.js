@@ -3,13 +3,19 @@
  */
 var Response = {
     resultSuccess: 0,
-    resultFalure: 0
+    resultFalure: 0,
+    clearResultCount:function(){
+        Response.resultSuccess=Response.resultFalure=0;
+    }
 };
+
+
 
 Response.uiController = {
     BoxStyle: '#loading_unit{display:none;border-radius:8px;box-shadow:0 0 4px rgba(0,0,0,.5),inset 0 0 60.5px rgba(225,225,225,.4);position:fixed;z-index:9999;width:310px;height:auto;left:50%;top:50%;margin-left:-155px;margin-top:-60px;background:white;text-align:center;font-size:16px;}#loading_unit p{margin:0;}#loading_unit h1{font-size:16px;color:#555;font-weight:bold;padding:0;margin:16px 0 5px 0;letter-spacing:-.0125em;background:none;}#loading_unit h2{font-size:12px;color:#555;font-weight:400;padding:0;letter-spacing:-.0125em;margin:0.83em;',
     boxObject: null,
-    DrawBox: function () {
+    drawBox: function () {
+        //var _this=this;
         var oLoadingBox = document.createElement('div');
         oLoadingBox.id = 'loading_unit';
         oLoadingBox.innerHTML = '<h1>正在保存...</h1><p></p><h2>如长时间无响应，请刷新页面重新保存</h2>';
@@ -18,16 +24,28 @@ Response.uiController = {
         oBoxStyle.innerHTML = Response.uiController.BoxStyle;
         document.body.appendChild(oLoadingBox);
         document.body.appendChild(oBoxStyle);
+        $(this.boxObject).ajaxStart(function(){
+            $(this).fadeIn('normal');
+            //console.log($(this));
+            $(this).html('<h1>正在操作</h1><p><img src="/subject/edit/images/loading_bar.gif" /></p><h2>如长时间无响应，请刷新页面重新操作</h2>');
+        });
     },
     showSuccess: function () {
+        var param=["操作成功！","执行结果"];
+        for(i=0;i<arguments.length;i++){
+            param[i]=arguments[i];
+        }
         if (this.boxObject)
-            this.boxObject.innerHTML = '<h1>保存结果</h1><p><img src="/subject/edit/images/onebit_34.png" /></p><h2>操作成功！</h2>';
-        $(this.boxObject).fadeIn('normal');
+            this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p><img src="/subject/edit/images/onebit_34.png" /></p><h2>'+param[0]+'</h2>';
+        this.completeHideResultBox();
     },
-    showFailure: function (exp) {
+    errorShowResultBox: function () {
+        var param=["服务器发生错误","保存结果"];
+        for(i=0;i<arguments.length;i++){
+            param[i]=arguments[i];
+        }
         if (this.boxObject)
-            this.boxObject.innerHTML = '<h1>保存结果</h1><p><img src="/subject/edit/images/onebit_33.png" /></p><h2>操作失败！详细情况：' + exp + '</h2>';
-        $('#loading_unit').fadeIn('normal');
+            this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p><img src="/subject/edit/images/onebit_33.png" /></p><h2>操作失败，请刷新浏览器重新操作！<br/>详细情况：' + param[0] + '</h2>';
     },
     hideProgress: function () {
         $('#loading_unit .progress').fadeOut(1000);
@@ -48,19 +66,26 @@ Response.uiController = {
     hideLoadingBar: function () {
         $('#loading_unit .progress').hide();
     },
-    beforeSend: function () {
-        $(this.boxObject).fadeIn('normal');
-        $('#loading_unit p').html("<img src='/subject/edit/images/loading_bar.gif' />");
-    },
-    showResultBox: function (title,isSucess,result) {
-        $(this.boxObject).fadeIn('100');
+    successShowResultBox: function () {
+        var param=['',"保存结果"];
+        var result='';
+        for(i=0;i<arguments.length;i++){
+            param[i]=arguments[i];
+        }
         var strLogo = '';
-        if(isSucess)
+        if (/True/.test(param[0]) && !/False/.test(param[0])) {
             strLogo = "<img src='/subject/edit/images/onebit_34.png' />";
-        else
+            result='保存成功';
+            this.completeHideResultBox();
+        }else {
             strLogo = "<img src='/subject/edit/images/onebit_33.png' />";
-        this.boxObject.innerHTML = '<h1>'+title+'</h1><p>' + strLogo + '</p><h2>'+result+'</h2>';
-        setTimeout("$(Response.uiController.boxObject).fadeOut(500)", 3000);
+            result='保存失败，请刷新浏览器重新操作！<br/>详细情况：null';
+        }
+        this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p>' + strLogo + '</p><h2>'+result+'</h2>';
+
+    },
+    completeHideResultBox:function(){
+        setTimeout('$(Response.uiController.boxObject).fadeOut(500)',1000);
     }
 };
 
