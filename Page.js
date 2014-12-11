@@ -14,6 +14,7 @@ Page.getHashNumber=function(){
        return this.location.match(/#(\d+)/i)[1];
 };
 Page.checkAccout=function(func){
+    var _this=this;
     $.ajax({
         url: '/Users/AjaxHandler/LoginCheck.aspx',
         type: "post",
@@ -31,7 +32,7 @@ Page.checkAccout=function(func){
                     type: "POST",
                     data: {
                         name: encodeURI(models.UserName),
-                        url: encodeURI(this.documentName)
+                        url: encodeURI(_this.getDocumentName())
                     },
                     sync:false,
                     url: '/subject/edit/login.aspx',

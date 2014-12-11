@@ -4,11 +4,10 @@
 var Response = {
     resultSuccess: 0,
     resultFalure: 0,
-    clearResultCount:function(){
-        Response.resultSuccess=Response.resultFalure=0;
+    clearResultCount: function () {
+        Response.resultSuccess = Response.resultFalure = 0;
     }
 };
-
 
 
 Response.uiController = {
@@ -24,33 +23,41 @@ Response.uiController = {
         oBoxStyle.innerHTML = Response.uiController.BoxStyle;
         document.body.appendChild(oLoadingBox);
         document.body.appendChild(oBoxStyle);
-        $(this.boxObject).ajaxStart(function(){
-            $(this).fadeIn('normal');
-            //console.log($(this));
-            $(this).html('<h1>正在操作</h1><p><img src="/subject/edit/images/loading_bar.gif" /></p><h2>如长时间无响应，请刷新页面重新操作</h2>');
+        $(Response.uiController.boxObject).ajaxStart(
+            function(){
+                Response.uiController.showLoadingBox();
+            }
+        );
+        $(Response.uiController.boxObject).ajaxStop(function() {
+            Response.uiController.completeHideResultBox();
         });
     },
+    showLoadingBox: function () {
+        $(this.boxObject).show();
+        $(this.boxObject).html('<h1>正在操作</h1><p><img src="/subject/edit/images/loading_bar.gif" /></p><h2>如长时间无响应，请刷新页面重新操作</h2>');
+    },
     showSuccess: function () {
-        var param=["操作成功！","执行结果"];
-        for(i=0;i<arguments.length;i++){
-            param[i]=arguments[i];
+        var param = ["操作成功！", "执行结果"];
+        for (i = 0; i < arguments.length; i++) {
+            param[i] = arguments[i];
         }
         if (this.boxObject)
-            this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p><img src="/subject/edit/images/onebit_34.png" /></p><h2>'+param[0]+'</h2>';
+            this.boxObject.innerHTML = '<h1>' + param[1] + '</h1><p><img src="/subject/edit/images/onebit_34.png" /></p><h2>' + param[0] + '</h2>';
         this.completeHideResultBox();
     },
     errorShowResultBox: function () {
-        var param=["服务器发生错误","保存结果"];
-        for(i=0;i<arguments.length;i++){
-            param[i]=arguments[i];
+        var title = "保存结果";
+        var param = [];
+        for (i = 0; i < arguments.length; i++) {
+            param.push(arguments[i]);
         }
-        if (this.boxObject)
-            this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p><img src="/subject/edit/images/onebit_33.png" /></p><h2>操作失败，请刷新浏览器重新操作！<br/>详细情况：' + param[0] + '</h2>';
+		
+        if (this.boxObject){
+            this.boxObject.innerHTML = '<h1>' + param[0] + '</h1><p><img src="/subject/edit/images/onebit_33.png" /></p><h2>操作失败，请刷新浏览器重新操作！<br/>';
+			(arguments.length)&&(this.boxObject.innerHTML +='<b>详细情况：</b><br/>' + param.join('<br/>')+ '</h2>');
+		}
     },
-    hideProgress: function () {
-        $('#loading_unit .progress').fadeOut(1000);
-    },
-    showComputedResult: function (index) {
+    showComputedResult: function () {
         var intTimes = Response.resultSuccess + Response.resultFalure;
         var strLogo = '';
         if (!Response.resultFalure) {
@@ -60,32 +67,45 @@ Response.uiController = {
         }
         this.boxObject.innerHTML = '<h1>保存结果</h1><p>' + strLogo + '</p><h2>修改项目：' + intTimes + '项；成功：' + Response.resultSuccess + '项；失败：' + Response.resultFalure + '项</h2>';
     },
-    showLoadingBar: function () {
-        $('#loading_unit p').html("<img src='/subject/edit/images/loading_bar.gif' />");
-    },
     hideLoadingBar: function () {
         $('#loading_unit .progress').hide();
     },
     successShowResultBox: function () {
-        var param=['',"保存结果"];
-        var result='';
-        for(i=0;i<arguments.length;i++){
-            param[i]=arguments[i];
+		var title = "保存结果";
+        var param = [];
+        var result = '';
+        var regexWarnning='';
+        var fileName='';
+        for (i = 0; i < arguments.length; i++) {
+            param.push(arguments[i]);
         }
         var strLogo = '';
-        if (/True/.test(param[0]) && !/False/.test(param[0])) {
+        if (/True/.test(param[0])&& !/_file/.test(param[0]) && !/False/.test(param[0])) {
             strLogo = "<img src='/subject/edit/images/onebit_34.png' />";
-            result='保存成功';
+            result = '保存成功';
             this.completeHideResultBox();
-        }else {
-            strLogo = "<img src='/subject/edit/images/onebit_33.png' />";
-            result='保存失败，请刷新浏览器重新操作！<br/>详细情况：null';
         }
-        this.boxObject.innerHTML = '<h1>'+param[1]+'</h1><p>' + strLogo + '</p><h2>'+result+'</h2>';
+        else if(/True\(x\d+\)_file=\S+/.test(param[0])&& !/False/.test(param[0])){
+            regexWarnning=param[0].match(/True\(x(\d+)\)/i)[1];
+            fileName=param[0].match(/_file=(\S+)/i)[1];
+            //console.log(regexWarnning,fileName);
+            if(regexWarnning=='0001'){
+                strLogo = "<img width='30' height='30' src='/subject/edit/images/onebit_35.png' />";
+                result = '保存成功,警告系统未能检测到模板'+fileName+'含有基本的数据统计{$static}代码！搞唔好会影响绩效哦！';
+            }
+            this.completeHideResultBox(3000);
+        }
+        else {
+            strLogo = "<img src='/subject/edit/images/onebit_33.png' />";
+            result = '保存失败，请检查相关文件后刷新浏览器重新操作！<br/>';
+			arguments.length&&(result +='<b>详细情况：</b><br/>' + param.join('<br/>'));
+        }
+        this.boxObject.innerHTML = '<h1>' + title + '</h1><p>' + strLogo + '</p><h2>' + result + '</h2>';
 
     },
-    completeHideResultBox:function(){
-        setTimeout('$(Response.uiController.boxObject).fadeOut(500)',1000);
+    completeHideResultBox: function (m) {
+        this.hideTime=m||1000;
+        setTimeout('$(Response.uiController.boxObject).fadeOut(Response.hideTime)', 15000);
     }
 };
 
